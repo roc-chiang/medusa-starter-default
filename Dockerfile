@@ -1,6 +1,13 @@
-FROM node:20 AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
+
+# 安装编译原生模块需要的工具
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 RUN npm install --loglevel=error
@@ -24,8 +31,7 @@ ARG BACKEND_URL
 
 WORKDIR /app/.medusa/server
 
-COPY --from=builder /app/.medusa ./.medusa
-COPY --from=builder /app/.medusa/server/package.json ./package.json
+COPY --from=builder /app/.medusa/server .
 
 RUN npm install --production --loglevel=error
 
