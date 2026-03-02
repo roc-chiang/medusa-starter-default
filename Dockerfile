@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
-RUN npm install --loglevel=error
+RUN npm install
 RUN npm run build
 
 # ---- 生产镜像 ----
