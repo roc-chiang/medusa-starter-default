@@ -2,7 +2,7 @@
 set -e
 
 echo ">>> 运行数据库迁移..."
-npx medusa db:migrate
+node_modules/.bin/medusa db:migrate
 
 echo ">>> 启动 Medusa 服务..."
-exec npm run start
+exec node_modules/.bin/medusa start
