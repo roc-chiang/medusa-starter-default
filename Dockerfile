@@ -1,13 +1,13 @@
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
 COPY . .
-RUN npm install
+RUN npm install --loglevel=error
 RUN npm run build
 
 # ---- 生产镜像 ----
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 
 # 声明 Build Args（Coolify 需要在 build 阶段注入这些变量）
 ARG DATABASE_URL
@@ -22,17 +22,13 @@ ARG WORKER_MODE
 ARG PORT
 ARG BACKEND_URL
 
-WORKDIR /app
-
-# 复制构建产物
-COPY --from=builder /app/.medusa ./.medusa
-
 WORKDIR /app/.medusa/server
 
-# 只安装生产依赖
-RUN npm install --production
+COPY --from=builder /app/.medusa ./.medusa
+COPY --from=builder /app/.medusa/server/package.json ./package.json
 
-# 复制启动脚本
+RUN npm install --production --loglevel=error
+
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
