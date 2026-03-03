@@ -9,9 +9,13 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
+# 先复制 package 和 lockfile 利用缓存
+COPY package.json yarn.lock ./
+# 使用 yarn 极速安装（跳过依赖解析环节）
+RUN yarn install --frozen-lockfile
+
 COPY . .
-RUN npm install
-RUN npm run build
+RUN yarn build
 
 # ---- 生产镜像 ----
 FROM node:20-slim AS runner
@@ -32,8 +36,8 @@ ARG BACKEND_URL
 WORKDIR /app/.medusa/server
 
 COPY --from=builder /app/.medusa/server .
-
-RUN npm install --production --loglevel=error
+# Medusa 的产物里没有 lockfile，普通 yarn install 即可
+RUN yarn install --production
 
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
