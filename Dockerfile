@@ -9,18 +9,16 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# 先复制 package 和 lockfile 利用缓存
-COPY package.json yarn.lock ./
-# 使用 yarn 极速安装（跳过依赖解析环节）
-RUN yarn install --frozen-lockfile
+COPY package.json package-lock.json* ./
+# npm ci 比 npm install 快，严格按照 lock 文件安装
+RUN npm ci
 
 COPY . .
-RUN yarn build
+RUN npm run build
 
 # ---- 生产镜像 ----
 FROM node:20-slim AS runner
 
-# 声明 Build Args（Coolify 需要在 build 阶段注入这些变量）
 ARG DATABASE_URL
 ARG REDIS_URL
 ARG COOKIE_SECRET
@@ -36,8 +34,9 @@ ARG BACKEND_URL
 WORKDIR /app/.medusa/server
 
 COPY --from=builder /app/.medusa/server .
-# Medusa 的产物里没有 lockfile，普通 yarn install 即可
-RUN yarn install --production
+
+# 生产环境只需安装生成依赖，npm install 够用了
+RUN npm install --production
 
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
