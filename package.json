@@ -13,7 +13,7 @@
     "medusa"
   ],
   "scripts": {
-    "build": "npx cross-env NODE_ENV=development medusa build",
+    "build": "yarn --version && node -e 'console.log(process.memoryUsage())' && NODE_ENV=development medusa build",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "start": "medusa start",
     "dev": "medusa develop",
