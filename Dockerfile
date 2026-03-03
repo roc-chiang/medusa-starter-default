@@ -10,11 +10,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json yarn.lock* ./
-# 不加 --frozen-lockfile，让 yarn 自己做解析修正
+
+# ⭐️ 关键修复：强制设置 development 环境，确保 devDependencies (typescript/vite 等) 被顺利安装
+ENV NODE_ENV=development
 RUN yarn install
 
 COPY . .
-RUN yarn build
+
+# 增加内存上限并运行 build
+RUN NODE_OPTIONS="--max_old_space_size=4096" yarn build
 
 # ---- 生产镜像 ----
 FROM node:20-slim AS runner
@@ -35,6 +39,8 @@ WORKDIR /app/.medusa/server
 
 COPY --from=builder /app/.medusa/server .
 
+# 生产环境只需安装运行时依赖
+ENV NODE_ENV=production
 RUN yarn install --production
 
 COPY entrypoint.sh /app/entrypoint.sh
