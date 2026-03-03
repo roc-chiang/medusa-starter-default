@@ -46,7 +46,7 @@ COPY --from=builder /app/.yarn ./.yarn
 COPY --from=builder /app/.yarnrc.yml ./
 
 ENV NODE_ENV=production
-RUN yarn install --production
+RUN yarn workspaces focus --all --production || yarn install
 
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
