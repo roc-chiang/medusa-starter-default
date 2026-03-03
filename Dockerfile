@@ -9,9 +9,11 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json yarn.lock* ./
+# ⭐️ 关键修复：对于 Yarn 4.x 项目，必须拷贝 .yarn 目录和 .yarnrc.yml 才能正确读取配置和缓存安装状态！
+COPY package.json yarn.lock* .yarnrc.yml ./
+COPY .yarn ./.yarn
 
-# ⭐️ 关键修复：强制设置 development 环境，确保 devDependencies (typescript/vite 等) 被顺利安装
+# 强制开发环境安装
 ENV NODE_ENV=development
 RUN yarn install
 
@@ -39,7 +41,10 @@ WORKDIR /app/.medusa/server
 
 COPY --from=builder /app/.medusa/server .
 
-# 生产环境只需安装运行时依赖
+# 在 runner 阶段也需要使用 yarn 安装，直接拷贝过去
+COPY --from=builder /app/.yarn ./.yarn
+COPY --from=builder /app/.yarnrc.yml ./
+
 ENV NODE_ENV=production
 RUN yarn install --production
 
