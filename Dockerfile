@@ -9,12 +9,12 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json package-lock.json* ./
-# npm ci 比 npm install 快，严格按照 lock 文件安装
-RUN npm ci
+COPY package.json yarn.lock* ./
+# 不加 --frozen-lockfile，让 yarn 自己做解析修正
+RUN yarn install
 
 COPY . .
-RUN npm run build
+RUN yarn build
 
 # ---- 生产镜像 ----
 FROM node:20-slim AS runner
@@ -35,8 +35,7 @@ WORKDIR /app/.medusa/server
 
 COPY --from=builder /app/.medusa/server .
 
-# 生产环境只需安装生成依赖，npm install 够用了
-RUN npm install --production
+RUN yarn install --production
 
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
