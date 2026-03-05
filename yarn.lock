@@ -2992,6 +2992,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@medusajs/payment-stripe@npm:^2.13.3":
+  version: 2.13.3
+  resolution: "@medusajs/payment-stripe@npm:2.13.3"
+  dependencies:
+    stripe: "npm:^15.5.0"
+  peerDependencies:
+    "@medusajs/framework": 2.13.3
+  checksum: 10c0/e7bac1874270a5cd23881d80ec6209f1556994f32127462619c313baeff171c1e4ca64e79f08112d741bd50b89624effe9897719ab55aad9c991acd104fbadc3
+  languageName: node
+  linkType: hard
+
 "@medusajs/payment@npm:2.13.1":
   version: 2.13.1
   resolution: "@medusajs/payment@npm:2.13.1"
@@ -13063,6 +13074,7 @@ __metadata:
     "@medusajs/cli": "npm:2.13.1"
     "@medusajs/framework": "npm:2.13.1"
     "@medusajs/medusa": "npm:2.13.1"
+    "@medusajs/payment-stripe": "npm:^2.13.3"
     "@medusajs/test-utils": "npm:2.13.1"
     "@swc/core": "npm:^1.7.28"
     "@swc/jest": "npm:^0.2.36"
