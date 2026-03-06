@@ -2425,6 +2425,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@medusajs/cache-redis@npm:^2.13.3":
+  version: 2.13.3
+  resolution: "@medusajs/cache-redis@npm:2.13.3"
+  dependencies:
+    ioredis: "npm:^5.4.1"
+  peerDependencies:
+    "@medusajs/framework": 2.13.3
+  checksum: 10c0/055bd123a26d634af54388b9847396808dbc39902d6d879248dfc8de6799922d8a16269624e7357c37cac79d8f83105989d83cdd8f541001b17df80bf3e6699d
+  languageName: node
+  linkType: hard
+
 "@medusajs/caching-redis@npm:2.13.1":
   version: 2.13.1
   resolution: "@medusajs/caching-redis@npm:2.13.1"
@@ -2657,6 +2668,18 @@ __metadata:
   peerDependencies:
     "@medusajs/framework": 2.13.1
   checksum: 10c0/80ebfb8bffbb1184fa360cac52754b935d26a92b23523c2aead665924be63d393b104611a44516bbc5615cbb5dd2c26cabebcd564e5b9679a831ad5fbf0b4ef0
+  languageName: node
+  linkType: hard
+
+"@medusajs/event-bus-redis@npm:^2.13.3":
+  version: 2.13.3
+  resolution: "@medusajs/event-bus-redis@npm:2.13.3"
+  dependencies:
+    bullmq: "npm:5.13.0"
+    ioredis: "npm:^5.4.1"
+  peerDependencies:
+    "@medusajs/framework": 2.13.3
+  checksum: 10c0/172aae296030ac0919e62e3d81013b501ef8f3010076bb11d19a104f9b7a281851d8402e27ce8a7e087630a833c5431882385d79bc119f61911bd2d45c201905
   languageName: node
   linkType: hard
 
@@ -13071,7 +13094,9 @@ __metadata:
   resolution: "medusa-starter-default@workspace:."
   dependencies:
     "@medusajs/admin-sdk": "npm:2.13.1"
+    "@medusajs/cache-redis": "npm:^2.13.3"
     "@medusajs/cli": "npm:2.13.1"
+    "@medusajs/event-bus-redis": "npm:^2.13.3"
     "@medusajs/framework": "npm:2.13.1"
     "@medusajs/medusa": "npm:2.13.1"
     "@medusajs/payment-stripe": "npm:^2.13.3"
