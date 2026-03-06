@@ -25,6 +25,7 @@ RUN NODE_OPTIONS="--max_old_space_size=4096" yarn build
 # ---- 生产镜像 ----
 FROM node:20-slim AS runner
 
+# ⭐️ 必须保留 ARG 声明，否则 Coolify 配置的环境变量可能无法正确传递到运行时的 Medusa 中
 ARG DATABASE_URL
 ARG REDIS_URL
 ARG COOKIE_SECRET
@@ -36,19 +37,25 @@ ARG DISABLE_ADMIN
 ARG WORKER_MODE
 ARG PORT
 ARG BACKEND_URL
+ARG STRIPE_API_KEY
+ARG STRIPE_WEBHOOK_SECRET
 
 WORKDIR /app/.medusa/server
 
+# 拷贝构造成出的后端代码
 COPY --from=builder /app/.medusa/server .
 
-# 在 runner 阶段也需要使用 yarn 安装，直接拷贝过去
+# ⭐️ 关键修复：除了 package.json，必须也拷贝 yarn.lock 才能在生产环境下正确安装依赖
+COPY --from=builder /app/package.json /app/yarn.lock* /app/.yarnrc.yml ./
 COPY --from=builder /app/.yarn ./.yarn
-COPY --from=builder /app/.yarnrc.yml ./
 
+# 生产环境只需安装运行时依赖
 ENV NODE_ENV=production
+
+# ⭐️ Yarn 4.x 的生产安装命令应使用 workspaces focus
 RUN yarn workspaces focus --all --production || yarn install
 
-COPY entrypoint.sh /app/entrypoint.sh
+COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 9000
