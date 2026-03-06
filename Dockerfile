@@ -15,7 +15,7 @@ COPY .yarn ./.yarn
 
 # 强制开发环境安装
 ENV NODE_ENV=development
-RUN yarn install --verbose
+RUN yarn install 
 
 COPY . .
 
