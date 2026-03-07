@@ -3,7 +3,7 @@ node_modules
 .github
 .medusa
 .cache
-.yarn
+
 build
 dist
 .env
