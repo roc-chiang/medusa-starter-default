@@ -1,7 +1,7 @@
 import {
     type SubscriberConfig,
     type SubscriberArgs,
-} from "@medusajs/framework/subscribers"
+} from "@medusajs/framework"
 import { IOrderModuleService, INotificationModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 
