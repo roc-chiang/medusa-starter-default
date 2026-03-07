@@ -16,11 +16,11 @@ module.exports = defineConfig({
   },
   modules: [
     {
-      resolve: "@medusajs/notification",
+      resolve: "@medusajs/medusa/notification",
       options: {
         providers: [
           {
-            resolve: "@medusajs/notification-resend",
+            resolve: "./src/modules/resend",
             id: "resend-pardpro",
             options: {
               channels: ["email"],
@@ -29,7 +29,7 @@ module.exports = defineConfig({
             },
           },
           {
-            resolve: "@medusajs/notification-resend",
+            resolve: "./src/modules/resend",
             id: "resend-sodium",
             options: {
               channels: ["email"],

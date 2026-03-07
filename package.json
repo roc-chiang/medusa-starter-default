@@ -26,8 +26,8 @@
     "@medusajs/cli": "2.13.1",
     "@medusajs/framework": "2.13.1",
     "@medusajs/medusa": "2.13.1",
-    "@medusajs/notification-resend": "latest",
-    "@medusajs/payment-stripe": "^2.13.3"
+    "@medusajs/payment-stripe": "^2.13.3",
+    "resend": "^3.5.0"
   },
   "devDependencies": {
     "@medusajs/test-utils": "2.13.1",

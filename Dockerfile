@@ -25,23 +25,6 @@ RUN NODE_OPTIONS="--max_old_space_size=4096" yarn build
 # ---- 生产镜像 ----
 FROM node:20-slim AS runner
 
-# ⭐️ 必须保留 ARG 声明，否则 Coolify 配置的环境变量可能无法正确传递到运行时的 Medusa 中
-ARG DATABASE_URL
-ARG REDIS_URL
-ARG COOKIE_SECRET
-ARG JWT_SECRET
-ARG STORE_CORS
-ARG ADMIN_CORS
-ARG AUTH_CORS
-ARG DISABLE_ADMIN
-ARG WORKER_MODE
-ARG PORT
-ARG BACKEND_URL
-ARG STRIPE_API_KEY
-ARG STRIPE_WEBHOOK_SECRET
-ARG RESEND_API_KEY
-ARG RESEND_FROM
-
 WORKDIR /app/.medusa/server
 
 # 拷贝构造成出的后端代码
