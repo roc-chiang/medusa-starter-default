@@ -19,13 +19,8 @@ export default async function orderPlacedHandler({
     // 獲取訂單詳情，包括 sales_channel_id
     const order = await orderModuleService.retrieveOrder(data.id)
 
-    const SODIUM_SC_ID = "sc_01KJTHYXXAK6P2VXD4NSMC8R2X"
-    const PARDPRO_SC_ID = "sc_01KK2T9YB32B1FBK0E3E5FDQBC"
+    const fromEmail = "info@pardpro.ca"
 
-    let fromEmail = "info@pardpro.ca" // 默認 Pardpro
-    if (order.sales_channel_id === SODIUM_SC_ID) {
-        fromEmail = "support@sodiumfrostglow.com"
-    }
 
     // 發送通知
     await notificationModuleService.createNotifications({
