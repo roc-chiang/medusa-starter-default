@@ -32,7 +32,7 @@ export default async function orderPlacedHandler({
 
     // 發送通知
     await notificationModuleService.createNotifications({
-        to: order.email,
+        to: order.email as string,
         channel: "email",
         provider_id: providerId,
         template: "order-placed",
