@@ -21,20 +21,11 @@ module.exports = defineConfig({
         providers: [
           {
             resolve: "./src/modules/resend",
-            id: "resend-pardpro",
+            id: "resend",
             options: {
               channels: ["email"],
               api_key: process.env.RESEND_API_KEY,
-              from: "info@pardpro.ca",
-            },
-          },
-          {
-            resolve: "./src/modules/resend",
-            id: "resend-sodium",
-            options: {
-              channels: ["email"],
-              api_key: process.env.RESEND_API_KEY,
-              from: "support@sodiumfrostglow.com",
+              from: process.env.RESEND_FROM_EMAIL,
             },
           },
         ],

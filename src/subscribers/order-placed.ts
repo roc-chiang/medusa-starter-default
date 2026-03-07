@@ -22,12 +22,9 @@ export default async function orderPlacedHandler({
     const SODIUM_SC_ID = "sc_01KJTHYXXAK6P2VXD4NSMC8R2X"
     const PARDPRO_SC_ID = "sc_01KK2T9YB32B1FBK0E3E5FDQBC"
 
-    let providerId = "resend-pardpro" // 默認使用 Pardpro
-
+    let fromEmail = "info@pardpro.ca" // 默認 Pardpro
     if (order.sales_channel_id === SODIUM_SC_ID) {
-        providerId = "resend-sodium"
-    } else if (order.sales_channel_id === PARDPRO_SC_ID) {
-        providerId = "resend-pardpro"
+        fromEmail = "support@sodiumfrostglow.com"
     }
 
     // 發送通知
@@ -35,9 +32,10 @@ export default async function orderPlacedHandler({
         to: order.email as string,
         channel: "email",
         template: "order-placed",
-        provider_id: providerId, // 保持此字段，但在類型上使用 as any
         data: {
             order,
+            from: fromEmail,
+            subject: "Order Confirmation",
         },
     } as any)
 }

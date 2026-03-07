@@ -30,7 +30,7 @@ class ResendNotificationService extends AbstractNotificationProviderService {
         }
 
         const { data, error } = await this.resend.emails.send({
-            from: this.options.from,
+            from: (notification.data as any).from || this.options.from,
             to: notification.to,
             subject: (notification.data as any).subject || "Notification",
             html: (notification.data as any).html || `<p>${JSON.stringify(notification.data)}</p>`,
