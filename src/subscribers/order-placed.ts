@@ -34,12 +34,12 @@ export default async function orderPlacedHandler({
     await notificationModuleService.createNotifications({
         to: order.email as string,
         channel: "email",
-        provider_id: providerId,
         template: "order-placed",
+        provider_id: providerId, // 保持此字段，但在類型上使用 as any
         data: {
             order,
         },
-    })
+    } as any)
 }
 
 export const config: SubscriberConfig = {
