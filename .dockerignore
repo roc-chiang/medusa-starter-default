@@ -1,0 +1,12 @@
+node_modules
+.git
+.github
+.medusa
+.cache
+.yarn
+build
+dist
+.env
+Dockerfile
+.dockerignore
+yarn-error.log
