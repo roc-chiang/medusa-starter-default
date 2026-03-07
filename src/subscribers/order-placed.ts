@@ -1,14 +1,14 @@
 import {
     type SubscriberConfig,
-    type SubscriberArgs,
-} from "@medusajs/framework/types"
+    type Subscriber,
+} from "@medusajs/medusa"
 import { IOrderModuleService, INotificationModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 
 export default async function orderPlacedHandler({
     event: { data },
     container,
-}: SubscriberArgs<{ id: string }>) {
+}: Subscriber<{ id: string }>) {
     const orderModuleService: IOrderModuleService = container.resolve(
         Modules.ORDER
     )

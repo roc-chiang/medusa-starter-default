@@ -1,8 +1,7 @@
 import { AbstractNotificationProviderService } from "@medusajs/framework/utils"
 import {
     ProviderSendNotificationDTO,
-    ProviderSendNotificationResultsDTO,
-    NotificationResponse
+    ProviderSendNotificationResultsDTO
 } from "@medusajs/framework/types"
 import { Resend } from "resend"
 
