@@ -9,15 +9,21 @@ export default async function orderPlacedHandler({
     event: { data },
     container,
 }: SubscriberArgs<{ id: string }>) {
-    const orderModuleService: IOrderModuleService = container.resolve(
+    const orderService: IOrderModuleService = container.resolve(
         Modules.ORDER
     )
     const notificationModuleService: INotificationModuleService = container.resolve(
         Modules.NOTIFICATION
     )
 
-    // 獲取訂單詳情，包括 sales_channel_id
-    const order = await orderModuleService.retrieveOrder(data.id)
+    // 查詢完整訂單數據，帶上必要的關聯
+    const order = await orderService.retrieveOrder(data.id, {
+        relations: [
+            "items",
+            "shipping_address",
+            "shipping_methods",
+        ],
+    })
 
     const SALES_CHANNEL_SODIUM = process.env.SALES_CHANNEL_SODIUM
     const brand = order.sales_channel_id === SALES_CHANNEL_SODIUM ? 'sodium' : 'pardpro'
