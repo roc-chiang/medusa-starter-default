@@ -16,6 +16,31 @@ module.exports = defineConfig({
   },
   modules: [
     {
+      resolve: "@medusajs/notification",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/notification-resend",
+            id: "resend-pardpro",
+            options: {
+              channels: ["email"],
+              api_key: process.env.RESEND_API_KEY,
+              from: "info@pardpro.ca",
+            },
+          },
+          {
+            resolve: "@medusajs/notification-resend",
+            id: "resend-sodium",
+            options: {
+              channels: ["email"],
+              api_key: process.env.RESEND_API_KEY,
+              from: "support@sodiumfrostglow.com",
+            },
+          },
+        ],
+      },
+    },
+    {
       resolve: "@medusajs/payment",
       options: {
         providers: [
