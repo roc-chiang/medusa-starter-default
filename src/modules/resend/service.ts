@@ -6,6 +6,9 @@ import {
 } from "@medusajs/framework/types"
 import { Resend } from "resend"
 
+import { pardproTemplate } from "./templates/order-confirmation-pardpro"
+import { sodiumTemplate } from "./templates/order-confirmation-sodium"
+
 type ResendOptions = {
     api_key: string
     from: string
@@ -29,11 +32,22 @@ class ResendNotificationService extends AbstractNotificationProviderService {
             throw new Error("No recipient specified")
         }
 
+        const order = (notification.data as any).order
+        const brand = (notification.data as any).brand
+
+        if (!order) {
+            throw new Error("No order data provided in notification")
+        }
+
+        const html = brand === 'sodium'
+            ? sodiumTemplate(order)
+            : pardproTemplate(order)
+
         const { data, error } = await this.resend.emails.send({
             from: (notification.data as any).from || this.options.from,
             to: notification.to,
-            subject: (notification.data as any).subject || "Notification",
-            html: (notification.data as any).html || `<p>${JSON.stringify(notification.data)}</p>`,
+            subject: (notification.data as any).subject || `Order Confirmed #${order.display_id}`,
+            html,
         })
 
         if (error) {

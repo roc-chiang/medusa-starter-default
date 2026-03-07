@@ -19,6 +19,8 @@ export default async function orderPlacedHandler({
     // 獲取訂單詳情，包括 sales_channel_id
     const order = await orderModuleService.retrieveOrder(data.id)
 
+    const SALES_CHANNEL_SODIUM = process.env.SALES_CHANNEL_SODIUM
+    const brand = order.sales_channel_id === SALES_CHANNEL_SODIUM ? 'sodium' : 'pardpro'
     const fromEmail = "info@pardpro.ca"
 
 
@@ -26,11 +28,11 @@ export default async function orderPlacedHandler({
     await notificationModuleService.createNotifications({
         to: order.email as string,
         channel: "email",
-        template: "order-placed",
+        template: "order-confirmation",
         data: {
             order,
+            brand,
             from: fromEmail,
-            subject: "Order Confirmation",
         },
     } as any)
 }
