@@ -16,20 +16,28 @@ export default async function orderPlacedHandler({
         Modules.NOTIFICATION
     )
 
-    // 查詢完整訂單數據，帶上必要的關聯（必須包含 summary 才能獲獲取彙總數據）
-    let order = await orderService.retrieveOrder(data.id, {
+    // 根據專家最終建議：relations 必須含 summary，且 select 也必須包含 summary 及其欄位
+    const order = await orderService.retrieveOrder(data.id, {
         relations: [
             "items",
             "shipping_address",
             "shipping_methods",
-            "summary", // 👈 Medusa v2 核心：必須加這行才能讀取彙總數據
+            "summary"
         ],
-    })
-
-    // 如果根路徑金額為 0 且 summary 存在，則嘗試從 summary 補齊（應對同步延遲）
-    if (order.total === 0 && order.summary) {
-        console.log(`[DEBUG] Root totals are 0, using summary data...`)
-    }
+        select: [
+            "id",
+            "display_id",
+            "email",
+            "created_at",
+            "total",
+            "subtotal",
+            "tax_total",
+            "shipping_total",
+            "summary",
+            "currency_code",
+            "sales_channel_id"
+        ]
+    } as any)
 
     console.log(`[DEBUG] Order Placed: ${order.id}`)
     console.log(`[DEBUG] Order Totals: total=${order.total}, subtotal=${order.subtotal}, tax=${order.tax_total}, shipping=${order.shipping_total}`)
