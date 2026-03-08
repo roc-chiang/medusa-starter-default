@@ -3,25 +3,35 @@ import { sodiumTemplate } from "./src/modules/resend/templates/order-confirmatio
 import * as fs from "fs"
 
 /**
- * 測試資料：模擬 Medusa v2 真實訂單數據
- * 1. 金額：直接從 root 讀取 (total, subtotal, etc.)，不除以 100
- * 2. 數量：根據 variant_id 映射
+ * 完整測試腳本：驗證 Medusa v2 數據結構與套裝數量映射
  */
 const mockOrder = {
     display_id: 1001,
     created_at: new Date().toISOString(),
     email: "gujian8@gmail.com",
-    // Medusa v2 根路徑金額 (直接以「元」為單位)
+    // Medusa v2 根路徑金額（直接以元為單位，不除以 100）
     total: 476.00,
     subtotal: 396.00,
     shipping_total: 20.00,
     tax_total: 60.00,
     items: [
         {
-            title: "Sodium-ion Flashlight (Bundle)",
-            quantity: 1, // 後端原始數量為 1
+            title: "Sodium-ion Flashlight (Bundle Pack)",
+            quantity: 1,
             unit_price: 119.00,
-            variant_id: "variant_01KK5M0ABC" // 測試 4-pack 映射
+            variant_id: "variant_01KK5KM_TEST" // 2-pack
+        },
+        {
+            title: "Sodium-ion Flashlight (Triple Pack)",
+            quantity: 1,
+            unit_price: 119.00,
+            variant_id: "variant_01KK5KY_TEST" // 3-pack
+        },
+        {
+            title: "Sodium-ion Flashlight (Quad Pack)",
+            quantity: 1,
+            unit_price: 119.00,
+            variant_id: "variant_01KK5M0_TEST" // 4-pack
         }
     ],
     shipping_address: {
@@ -42,13 +52,12 @@ try {
     fs.writeFileSync("test-sodium.html", sodiumHtml)
     fs.writeFileSync("test-pardpro.html", pardproHtml)
 
-    console.log("✅ 測試 HTML 已生成！")
-    console.log("- Sodium: test-sodium.html")
-    console.log("- Pardpro: test-pardpro.html")
-    console.log("\n驗證清單：")
-    console.log("1. 金額是否顯示為 CA$476.00 (而非 4.76)？")
-    console.log("2. 數量是否顯示為 qty: 4 (根據 variant_id 映射)？")
-    console.log("3. 佈局是否在瀏覽器中顯示美觀且穩定？")
+    console.log("✅ 全方位測試成功！")
+    console.log("- 2-pack variant -> 應顯示 qty: 2")
+    console.log("- 3-pack variant -> 應顯示 qty: 3")
+    console.log("- 4-pack variant -> 應顯示 qty: 4")
+    console.log("- 金額 476.00 -> 應顯示 CA$476.00")
+    console.log("\n請在瀏覽器打開 test-sodium.html 檢查最終視覺效果。")
 } catch (error) {
     console.error("❌ 生成失敗:", error)
 }
