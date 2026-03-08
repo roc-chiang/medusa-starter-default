@@ -41,11 +41,11 @@ export function sodiumTemplate(order: any): string {
     })
     .join("")
 
-  // 直接從 Medusa v2 訂單根路徑讀取總額
-  const subtotal = order.subtotal ?? 0;
-  const shipping = order.shipping_total ?? 0;
-  const tax = order.tax_total ?? 0;
-  const total = order.total ?? 0;
+  // 直接從 Medusa v2 訂單根路徑讀取總額，並處理 BigNumber
+  const subtotal = order.subtotal?.toNumber ? order.subtotal.toNumber() : (order.subtotal ?? 0);
+  const shipping = order.shipping_total?.toNumber ? order.shipping_total.toNumber() : (order.shipping_total ?? 0);
+  const tax = order.tax_total?.toNumber ? order.tax_total.toNumber() : (order.tax_total ?? 0);
+  const total = order.total?.toNumber ? order.total.toNumber() : (order.total ?? 0);
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
