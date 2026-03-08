@@ -26,6 +26,10 @@ export default async function orderPlacedHandler({
         ],
     })
 
+    console.log(`[DEBUG] Order Placed: ${order.id}`)
+    console.log(`[DEBUG] Order Totals: total=${order.total}, subtotal=${order.subtotal}, tax=${order.tax_total}, shipping=${order.shipping_total}`)
+    console.log(`[DEBUG] Order Summary: ${JSON.stringify(order.summary)}`)
+
     const SALES_CHANNEL_SODIUM = process.env.SALES_CHANNEL_SODIUM
     const brand = order.sales_channel_id === SALES_CHANNEL_SODIUM ? 'sodium' : 'pardpro'
     const fromEmail = "info@pardpro.ca"

@@ -47,11 +47,11 @@ export function sodiumTemplate(order: any): string {
     )
     .join("")
 
-  // 根據 Medusa v2 根路徑欄位讀取金額
-  const subtotal = order.subtotal;
-  const shipping = order.shipping_total;
-  const tax = order.tax_total;
-  const total = order.total;
+  // 取得金額數值（多重回退確保讀取到數據）
+  const subtotal = order.subtotal ?? order.summary?.subtotal ?? 0;
+  const shipping = order.shipping_total ?? order.summary?.shipping_total ?? 0;
+  const tax = order.tax_total ?? order.summary?.tax_total ?? 0;
+  const total = order.total ?? order.summary?.total ?? 0;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
