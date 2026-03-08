@@ -1,9 +1,9 @@
 export function sodiumTemplate(order: any): string {
   const getDisplayPrice = (amount: any) => {
     if (amount === undefined || amount === null) return "0.00";
-    // 如果是 BigNumber 或物件，試著取其數值，Medusa v2 價格通常以分(cents)存儲
+    // 根據用戶反饋，金額不需要除以 100
     const val = typeof amount === 'object' && amount.toNumber ? amount.toNumber() : Number(amount);
-    return (val / 100).toFixed(2);
+    return val.toFixed(2);
   }
 
   const formatDate = (date: Date | string) => {
@@ -14,134 +14,159 @@ export function sodiumTemplate(order: any): string {
     })
   }
 
-  const itemsHtml = order.items
-    ?.map(
-      (item: any) => `
-        <div class="item">
-          <div class="item-info">
-            <span class="item-name">${item.title}</span>
-            <span class="item-qty">qty: ${item.quantity}</span>
-          </div>
-          <span class="item-price">CA$${getDisplayPrice(item.unit_price)}</span>
-        </div>`
-    )
-    .join("") || ""
+  // 套裝數量映射邏輯 (基於 Variant ID)
+  const getDisplayQuantity = (item: any) => {
+    const vid = item.variant_id;
+    if (vid) {
+      if (vid.startsWith("variant_01KK5KM")) return 2;
+      if (vid.startsWith("variant_01KK5KY")) return 3;
+      if (vid.startsWith("variant_01KK5M0")) return 4;
+    }
 
-  return `<!DOCTYPE html>
-<html lang="en">
+    // 如果沒有匹配到特定 Variant，則備選使用 title 判斷，最後才用原始 quantity
+    const title = (item.title || "").toLowerCase();
+    if (title.includes("2-pack") || title.includes("2 pack")) return 2;
+    if (title.includes("3-pack") || title.includes("3 pack")) return 3;
+    if (title.includes("4-pack") || title.includes("4 pack")) return 4;
+
+    return item.quantity || 1;
+  }
+
+  const itemsHtml = (order.items || [])
+    .map(
+      (item: any) => `
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #1e293b;">
+            <div style="font-size: 14px; font-weight: 500; color: #cbd5e1;">${item.title}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569;">qty: ${getDisplayQuantity(item)}</div>
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #1e293b; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #94a3b8; vertical-align: top;">
+            CA$${getDisplayPrice(item.unit_price)}
+          </td>
+        </tr>`
+    )
+    .join("")
+
+  // 根據 Medusa v2 根路徑欄位讀取金額
+  const subtotal = order.subtotal;
+  const shipping = order.shipping_total;
+  const tax = order.tax_total;
+  const total = order.total;
+
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Confirmed</title>
-  <style>
+  <style type="text/css">
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap');
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background-color: #0a0a0f; color: #e2e8f0; font-family: 'Inter', sans-serif; padding: 40px 20px; }
-    .wrapper { max-width: 600px; margin: 0 auto; }
-    .header { border: 1px solid #1e293b; border-bottom: none; background: linear-gradient(135deg, #0f172a 0%, #0a0a0f 100%); padding: 32px 36px; position: relative; overflow: hidden; }
-    .header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6); }
-    .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .brand { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #06b6d4; letter-spacing: 0.1em; text-transform: uppercase; }
-    .status-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); color: #06b6d4; border-radius: 2px; letter-spacing: 0.05em; }
-    .header h1 { font-size: 28px; font-weight: 600; color: #f8fafc; letter-spacing: -0.02em; margin-bottom: 8px; }
-    .header p { font-size: 14px; color: #64748b; font-weight: 300; }
-    .order-id-block { background: #0f172a; border: 1px solid #1e293b; border-top: none; border-bottom: none; padding: 16px 36px; display: flex; align-items: center; gap: 12px; }
-    .order-id-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; }
-    .order-id-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #38bdf8; }
-    .divider-dot { width: 3px; height: 3px; background: #334155; border-radius: 50%; }
-    .content { border: 1px solid #1e293b; border-top: none; background: #0d1117; }
-    .section { padding: 28px 36px; border-bottom: 1px solid #1e293b; }
-    .section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .section-label::after { content: ''; flex: 1; height: 1px; background: #1e293b; }
-    .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e293b; }
-    .item-info { display: flex; flex-direction: column; gap: 3px; }
-    .item-name { font-size: 14px; font-weight: 500; color: #cbd5e1; }
-    .item-qty { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; }
-    .item-price { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #94a3b8; }
-    .totals { display: flex; flex-direction: column; gap: 10px; }
-    .total-row { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; }
-    .total-row.grand { padding-top: 14px; border-top: 1px solid #1e293b; font-size: 16px; font-weight: 600; color: #f8fafc; }
-    .total-row.grand .amount { font-family: 'JetBrains Mono', monospace; color: #06b6d4; font-size: 18px; }
-    .total-row .amount { font-family: 'JetBrains Mono', monospace; }
-    .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .address-field { display: flex; flex-direction: column; gap: 3px; }
-    .field-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; }
-    .field-value { font-size: 13px; color: #94a3b8; }
-    .next-steps { display: flex; flex-direction: column; gap: 14px; }
-    .step { display: flex; align-items: flex-start; gap: 14px; }
-    .step-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #06b6d4; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 2px; flex-shrink: 0; }
-    .step-text { font-size: 13px; color: #64748b; line-height: 1.6; }
-    .footer { border: 1px solid #1e293b; border-top: none; padding: 24px 36px; background: #0a0a0f; display: flex; justify-content: space-between; align-items: center; }
-    .footer-brand { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #334155; }
-    .footer-links { display: flex; gap: 20px; }
-    .footer-link { font-size: 12px; color: #475569; text-decoration: none; }
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #0a0a0f; color: #e2e8f0; font-family: 'Inter', Helvetica, Arial, sans-serif; }
   </style>
 </head>
-<body>
-  <div class="wrapper">
-    <div class="header">
-      <div class="header-top">
-        <span class="brand">// SodiumFrostGlow</span>
-        <span class="status-badge">ORDER_CONFIRMED</span>
-      </div>
-      <h1>Your order is in.</h1>
-      <p>We've received your order and are getting it ready.</p>
+<body style="background-color: #0a0a0f; color: #e2e8f0; font-family: 'Inter', Arial, sans-serif; padding: 40px 20px;">
+  <div style="max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #0a0a0f 100%); padding: 32px 36px; border-bottom: none; position: relative;">
+      <div style="height: 2px; background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6); width: 100%; margin: -32px auto 24px auto;"></div>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #06b6d4; letter-spacing: 0.1em; text-transform: uppercase;">// SodiumFrostGlow</td>
+          <td align="right">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); color: #06b6d4; border-radius: 2px; letter-spacing: 0.05em;">ORDER_CONFIRMED</span>
+          </td>
+        </tr>
+      </table>
+      <h1 style="font-size: 28px; font-weight: 600; color: #f8fafc; letter-spacing: -0.02em; margin: 24px 0 8px 0;">Your order is in.</h1>
+      <p style="font-size: 14px; color: #64748b; font-weight: 300; margin: 0;">We've received your order and are getting it ready.</p>
     </div>
-    <div class="order-id-block">
-      <span class="order-id-label">Order</span>
-      <span class="order-id-value">#${order.display_id}</span>
-      <span class="divider-dot"></span>
-      <span class="order-id-label">Placed</span>
-      <span class="order-id-value">${formatDate(order.created_at)}</span>
-      <span class="divider-dot"></span>
-      <span class="order-id-label">Status</span>
-      <span class="order-id-value">pending</span>
+
+    <!-- Order Info Block -->
+    <div style="background: #0f172a; border-left: 1px solid #1e293b; border-right: 1px solid #1e293b; padding: 16px 36px;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.1em;">Order <span style="color: #38bdf8; margin-left: 4px;">#${order.display_id}</span></td>
+          <td align="center" style="width: 10px;"><div style="width: 3px; height: 3px; background: #334155; border-radius: 50%;"></div></td>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.1em;">Placed <span style="color: #38bdf8; margin-left: 4px;">${formatDate(order.created_at)}</span></td>
+          <td align="center" style="width: 10px;"><div style="width: 3px; height: 3px; background: #334155; border-radius: 50%;"></div></td>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.1em;">Status <span style="color: #38bdf8; margin-left: 4px;">pending</span></td>
+        </tr>
+      </table>
     </div>
-    <div class="content">
-      <div class="section">
-        <div class="section-label">Items Ordered</div>
-        ${itemsHtml}
+
+    <!-- Content Area -->
+    <div style="background: #0d1117; border: 1px solid #1e293b; border-top: none;">
+      <!-- Items Section -->
+      <div style="padding: 28px 36px; border-bottom: 1px solid #1e293b;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 8px;">Items Ordered</div>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          ${itemsHtml}
+        </table>
       </div>
-      <div class="section">
-        <div class="section-label">Summary</div>
-        <div class="totals">
-          <div class="total-row"><span>Subtotal</span><span class="amount">CA$${getDisplayPrice(order.summary?.subtotal)}</span></div>
-          <div class="total-row"><span>Shipping</span><span class="amount">CA$${getDisplayPrice(order.summary?.shipping_total)}</span></div>
-          <div class="total-row"><span>Tax</span><span class="amount">CA$${getDisplayPrice(order.summary?.tax_total)}</span></div>
-          <div class="total-row grand"><span>Total</span><span class="amount">CA$${getDisplayPrice(order.summary?.total)}</span></div>
-        </div>
+
+      <!-- Summary Section -->
+      <div style="padding: 28px 36px; border-bottom: 1px solid #1e293b;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 8px;">Summary</div>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #64748b; font-size: 13px;">
+          <tr>
+            <td style="padding: 4px 0;">Subtotal</td>
+            <td align="right" style="padding: 4px 0; font-family: 'JetBrains Mono', monospace;">CA$${getDisplayPrice(subtotal)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Shipping</td>
+            <td align="right" style="padding: 4px 0; font-family: 'JetBrains Mono', monospace;">CA$${getDisplayPrice(shipping)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Tax</td>
+            <td align="right" style="padding: 4px 0; font-family: 'JetBrains Mono', monospace;">CA$${getDisplayPrice(tax)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 14px 0 0 0; border-top: 1px solid #1e293b; font-size: 16px; font-weight: 600; color: #f8fafc;">Total</td>
+            <td align="right" style="padding: 14px 0 0 0; border-top: 1px solid #1e293b; font-family: 'JetBrains Mono', monospace; color: #06b6d4; font-size: 18px;">CA$${getDisplayPrice(total)}</td>
+          </tr>
+        </table>
       </div>
-      <div class="section">
-        <div class="section-label">Ship To</div>
-        <div class="address-grid">
-          <div class="address-field">
-            <span class="field-label">Name</span>
-            <span class="field-value">${order.shipping_address?.first_name} ${order.shipping_address?.last_name}</span>
-          </div>
-          <div class="address-field">
-            <span class="field-label">Email</span>
-            <span class="field-value">${order.email}</span>
-          </div>
-          <div class="address-field" style="grid-column: 1 / -1">
-            <span class="field-label">Address</span>
-            <span class="field-value">${order.shipping_address?.address_1}, ${order.shipping_address?.city}, ${order.shipping_address?.province} ${order.shipping_address?.postal_code}</span>
-          </div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="section-label">What Happens Next</div>
-        <div class="next-steps">
-          <div class="step"><span class="step-num">01</span><span class="step-text"><strong>Processing</strong> — We're preparing your order.</span></div>
-          <div class="step"><span class="step-num">02</span><span class="step-text"><strong>Shipped</strong> — You'll receive a tracking number soon.</span></div>
-        </div>
+
+      <!-- Shipping Address -->
+      <div style="padding: 28px 36px; border-bottom: 1px solid #1e293b;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 8px;">Ship To</div>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td width="50%" style="vertical-align: top; padding-right: 10px;">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; margin-bottom: 4px;">Name</div>
+              <div style="font-size: 13px; color: #94a3b8;">${order.shipping_address?.first_name} ${order.shipping_address?.last_name}</div>
+            </td>
+            <td width="50%" style="vertical-align: top;">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; margin-bottom: 4px;">Email</div>
+              <div style="font-size: 13px; color: #94a3b8;">${order.email}</div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding-top: 16px;">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; margin-bottom: 4px;">Address</div>
+              <div style="font-size: 13px; color: #94a3b8;">
+                ${order.shipping_address?.address_1}, ${order.shipping_address?.city}, ${order.shipping_address?.province} ${order.shipping_address?.postal_code}
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
-    <div class="footer">
-      <span class="footer-brand">sodiumfrostglow.com</span>
-      <div class="footer-links">
-        <a href="mailto:support@sodiumfrostglow.com" class="footer-link">support@sodiumfrostglow.com</a>
-        <a href="https://sodiumfrostglow.com" class="footer-link">visit store</a>
-      </div>
+
+    <!-- Footer -->
+    <div style="padding: 24px 36px; background: #0a0a0f;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #334155;">sodiumfrostglow.com</td>
+          <td align="right">
+            <a href="mailto:support@sodiumfrostglow.com" style="font-size: 12px; color: #475569; text-decoration: none; margin-right: 16px;">support</a>
+            <a href="https://sodiumfrostglow.com" style="font-size: 12px; color: #475569; text-decoration: none;">store</a>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </body>
