@@ -1,4 +1,11 @@
 export function sodiumTemplate(order: any): string {
+  const getDisplayPrice = (amount: any) => {
+    if (amount === undefined || amount === null) return "0.00";
+    // 如果是 BigNumber 或物件，試著取其數值，Medusa v2 價格通常以分(cents)存儲
+    const val = typeof amount === 'object' && amount.toNumber ? amount.toNumber() : Number(amount);
+    return (val / 100).toFixed(2);
+  }
+
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "long",
@@ -8,17 +15,17 @@ export function sodiumTemplate(order: any): string {
   }
 
   const itemsHtml = order.items
-    .map(
+    ?.map(
       (item: any) => `
         <div class="item">
           <div class="item-info">
             <span class="item-name">${item.title}</span>
             <span class="item-qty">qty: ${item.quantity}</span>
           </div>
-          <span class="item-price">CA$${(item.unit_price ?? 0).toFixed(2)}</span>
+          <span class="item-price">CA$${getDisplayPrice(item.unit_price)}</span>
         </div>`
     )
-    .join("")
+    .join("") || ""
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -46,7 +53,7 @@ export function sodiumTemplate(order: any): string {
     .section { padding: 28px 36px; border-bottom: 1px solid #1e293b; }
     .section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .section-label::after { content: ''; flex: 1; height: 1px; background: #1e293b; }
-    .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #1e293b; }
+    .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e293b; }
     .item-info { display: flex; flex-direction: column; gap: 3px; }
     .item-name { font-size: 14px; font-weight: 500; color: #cbd5e1; }
     .item-qty { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; }
@@ -98,10 +105,10 @@ export function sodiumTemplate(order: any): string {
       <div class="section">
         <div class="section-label">Summary</div>
         <div class="totals">
-          <div class="total-row"><span>Subtotal</span><span class="amount">CA$${(order.subtotal ?? 0).toFixed(2)}</span></div>
-          <div class="total-row"><span>Shipping</span><span class="amount">CA$${(order.shipping_total ?? 0).toFixed(2)}</span></div>
-          <div class="total-row"><span>Tax</span><span class="amount">CA$${(order.tax_total ?? 0).toFixed(2)}</span></div>
-          <div class="total-row grand"><span>Total</span><span class="amount">CA$${(order.total ?? 0).toFixed(2)}</span></div>
+          <div class="total-row"><span>Subtotal</span><span class="amount">CA$${getDisplayPrice(order.summary?.subtotal)}</span></div>
+          <div class="total-row"><span>Shipping</span><span class="amount">CA$${getDisplayPrice(order.summary?.shipping_total)}</span></div>
+          <div class="total-row"><span>Tax</span><span class="amount">CA$${getDisplayPrice(order.summary?.tax_total)}</span></div>
+          <div class="total-row grand"><span>Total</span><span class="amount">CA$${getDisplayPrice(order.summary?.total)}</span></div>
         </div>
       </div>
       <div class="section">

@@ -16,19 +16,19 @@ export default async function orderPlacedHandler({
         Modules.NOTIFICATION
     )
 
-    // 查詢完整訂單數據，帶上必要的關聯
+    // 查詢完整訂單數據，帶上必要的關聯（包含 summary 以獲取結帳總額）
     const order = await orderService.retrieveOrder(data.id, {
         relations: [
             "items",
             "shipping_address",
             "shipping_methods",
+            "summary",
         ],
     })
 
     const SALES_CHANNEL_SODIUM = process.env.SALES_CHANNEL_SODIUM
     const brand = order.sales_channel_id === SALES_CHANNEL_SODIUM ? 'sodium' : 'pardpro'
     const fromEmail = "info@pardpro.ca"
-
 
     // 發送通知
     await notificationModuleService.createNotifications({

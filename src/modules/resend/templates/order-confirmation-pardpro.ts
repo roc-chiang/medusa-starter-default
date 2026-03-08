@@ -1,4 +1,11 @@
 export function pardproTemplate(order: any): string {
+  const getDisplayPrice = (amount: any) => {
+    if (amount === undefined || amount === null) return "0.00";
+    // 如果是 BigNumber 或物件，試著取其數值，Medusa v2 價格通常以分(cents)存儲
+    const val = typeof amount === 'object' && amount.toNumber ? amount.toNumber() : Number(amount);
+    return (val / 100).toFixed(2);
+  }
+
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "long",
@@ -8,17 +15,17 @@ export function pardproTemplate(order: any): string {
   }
 
   const itemsHtml = order.items
-    .map(
+    ?.map(
       (item: any) => `
         <div class="item">
           <div class="item-info">
             <span class="item-name">${item.title}</span>
             <span class="item-qty">qty: ${item.quantity}</span>
           </div>
-          <span class="item-price">CA$${(item.unit_price ?? 0).toFixed(2)}</span>
+          <span class="item-price">CA$${getDisplayPrice(item.unit_price)}</span>
         </div>`
     )
-    .join("")
+    .join("") || ""
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -60,10 +67,10 @@ export function pardproTemplate(order: any): string {
       <div class="section-label">Your Selection</div>
       ${itemsHtml}
       <div class="totals">
-        <div class="total-row"><span>Subtotal</span><span>CA$${(order.subtotal ?? 0).toFixed(2)}</span></div>
-        <div class="total-row"><span>Shipping</span><span>CA$${(order.shipping_total ?? 0).toFixed(2)}</span></div>
-        <div class="total-row"><span>Tax</span><span>CA$${(order.tax_total ?? 0).toFixed(2)}</span></div>
-        <div class="total-row grand"><span>Total</span><span>CA$${(order.total ?? 0).toFixed(2)}</span></div>
+        <div class="total-row"><span>Subtotal</span><span>CA$${getDisplayPrice(order.summary?.subtotal)}</span></div>
+        <div class="total-row"><span>Shipping</span><span>CA$${getDisplayPrice(order.summary?.shipping_total)}</span></div>
+        <div class="total-row"><span>Tax</span><span>CA$${getDisplayPrice(order.summary?.tax_total)}</span></div>
+        <div class="total-row grand"><span>Total</span><span>CA$${getDisplayPrice(order.summary?.total)}</span></div>
       </div>
       <div style="margin-top: 40px;">
         <div class="section-label">Shipping To</div>
