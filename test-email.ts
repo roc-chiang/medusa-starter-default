@@ -3,35 +3,30 @@ import { sodiumTemplate } from "./src/modules/resend/templates/order-confirmatio
 import * as fs from "fs"
 
 /**
- * 完整測試腳本：驗證 Medusa v2 數據結構與套裝數量映射
+ * 完整測試腳本：驗證 Medusa v2 根欄位金額與精確 Variant 數量映射
  */
 const mockOrder = {
     display_id: 1001,
+    id: "order_01",
     created_at: new Date().toISOString(),
     email: "gujian8@gmail.com",
-    // Medusa v2 根路徑金額（直接以元為單位，不除以 100）
-    total: 476.00,
-    subtotal: 396.00,
-    shipping_total: 20.00,
-    tax_total: 60.00,
+    // Medusa v2 根欄位金額
+    subtotal: 396,
+    shipping_total: 20,
+    tax_total: 60,
+    total: 476,
     items: [
         {
-            title: "Sodium-ion Flashlight (Bundle Pack)",
+            title: "Sodium-ion Flashlight (4-pack)",
             quantity: 1,
-            unit_price: 119.00,
-            variant_id: "variant_01KK5KM_TEST" // 2-pack
+            unit_price: 119,
+            variant_id: "variant_01KK5M0ABC" // 應被判定為 4 包，總價 476
         },
         {
-            title: "Sodium-ion Flashlight (Triple Pack)",
-            quantity: 1,
-            unit_price: 119.00,
-            variant_id: "variant_01KK5KY_TEST" // 3-pack
-        },
-        {
-            title: "Sodium-ion Flashlight (Quad Pack)",
-            quantity: 1,
-            unit_price: 119.00,
-            variant_id: "variant_01KK5M0_TEST" // 4-pack
+            title: "Backup Battery Pack",
+            quantity: 2,
+            unit_price: 59,
+            variant_id: "variant_battery_01" // 應顯示數量 2，且總價 118
         }
     ],
     shipping_address: {
@@ -45,19 +40,21 @@ const mockOrder = {
     }
 }
 
-try {
-    const sodiumHtml = sodiumTemplate(mockOrder)
-    const pardproHtml = pardproTemplate(mockOrder)
+// 生成 HTML 並保存
+const htmlSodium = sodiumTemplate(mockOrder)
+const htmlPardpro = pardproTemplate(mockOrder)
 
-    fs.writeFileSync("test-sodium.html", sodiumHtml)
-    fs.writeFileSync("test-pardpro.html", pardproHtml)
+fs.writeFileSync("test-email-sodium.html", htmlSodium)
+fs.writeFileSync("test-email-pardpro.html", htmlPardpro)
 
-    console.log("✅ 全方位測試成功！")
-    console.log("- 2-pack variant -> 應顯示 qty: 2")
-    console.log("- 3-pack variant -> 應顯示 qty: 3")
-    console.log("- 4-pack variant -> 應顯示 qty: 4")
-    console.log("- 金額 476.00 -> 應顯示 CA$476.00")
-    console.log("\n請在瀏覽器打開 test-sodium.html 檢查最終視覺效果。")
-} catch (error) {
-    console.error("❌ 生成失敗:", error)
-}
+console.log("-----------------------------------------")
+console.log("✅ 測試文件已生成：")
+console.log("1. test-email-sodium.html (Sodium 模板)")
+console.log("2. test-email-pardpro.html (Pardpro 模板)")
+console.log("-----------------------------------------")
+console.log("預期結果：")
+console.log("- Flashlight: qty 4, Total CA$476.00")
+console.log("- Battery: qty 2, Total CA$118.00")
+console.log("- Summary: Subtotal $396.00, Total $476.00")
+console.log("-----------------------------------------")
+"

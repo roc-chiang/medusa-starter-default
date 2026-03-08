@@ -22,8 +22,10 @@ export default async function orderPlacedHandler({
             "items",
             "shipping_address",
             "shipping_methods",
-            "summary",
         ],
+        select: [
+            "id", "display_id", "email", "created_at", "total", "subtotal", "tax_total", "shipping_total", "currency_code", "sales_channel_id"
+        ]
     })
 
     console.log(`[DEBUG] Order Placed: ${order.id}`)
