@@ -30,6 +30,7 @@ const mockOrder = {
         shipping_total: createBigNumber(20),
         tax_total: createBigNumber(60),
         total: createBigNumber(476),
+        current_order_total: createBigNumber(476),
     },
     items: [
         {

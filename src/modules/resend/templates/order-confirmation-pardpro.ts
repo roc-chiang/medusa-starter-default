@@ -50,12 +50,12 @@ export function pardproTemplate(order: any): string {
     })
     .join("")
 
-  // Medusa v2 彙總金額應優先從 order.summary 讀取 (專家建議最穩定來源)
+  // Medusa v2 彙總金額：總價建議使用 current_order_total，小計/稅/運費使用根欄位 (需搭配 Subscriber select)
   const summary = order.summary || {};
-  const subtotal = summary.subtotal ?? order.subtotal ?? 0;
-  const shipping = summary.shipping_total ?? order.shipping_total ?? 0;
-  const tax = summary.tax_total ?? order.tax_total ?? 0;
-  const total = summary.total ?? order.total ?? 0;
+  const subtotal = order.subtotal ?? summary.subtotal ?? 0;
+  const shipping = order.shipping_total ?? summary.shipping_total ?? 0;
+  const tax = order.tax_total ?? summary.tax_total ?? 0;
+  const total = summary.current_order_total ?? order.total ?? 0;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
