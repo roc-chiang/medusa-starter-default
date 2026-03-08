@@ -34,10 +34,10 @@ const mockOrder = {
     },
     items: [
         {
-            title: "Sodium-ion Flashlight (4-pack)",
+            title: "Sodium-ion Flashlight",
             quantity: 1,
-            unit_price: createBigNumber(119),
-            variant_id: "variant_01KK5M0ABC"
+            unit_price: createBigNumber(372),
+            variant_id: "variant_01KK5KYABC" // 3-pack multiplier
         },
         {
             title: "Backup Battery Pack",

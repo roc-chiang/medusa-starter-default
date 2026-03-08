@@ -21,7 +21,7 @@ export function sodiumTemplate(order: any): string {
     return val.toFixed(2);
   }
 
-  const getDisplayQuantity = (item: any) => {
+  const getMultiplier = (item: any) => {
     const vid = item.variant_id;
     if (vid) {
       if (vid.startsWith("variant_01KK5KM")) return 2;
@@ -34,15 +34,25 @@ export function sodiumTemplate(order: any): string {
     if (title.includes("3-pack")) return 3;
     if (title.includes("4-pack")) return 4;
 
-    return item.quantity || 1;
+    return 1;
+  }
+
+  const getNumericValue = (amount: any) => {
+    if (amount === undefined || amount === null) return 0;
+    if (typeof amount === 'object' && amount.value !== undefined) return Number(amount.value);
+    if (typeof amount === 'object' && typeof amount.toNumber === 'function') return amount.toNumber();
+    return Number(amount);
   }
 
   const itemsHtml = (order.items || [])
     .map((item: any) => {
-      const displayQty = getDisplayQuantity(item);
-      // 行項目單價也可能是 BigNumber
-      const unitPrice = item.unit_price?.toNumber ? item.unit_price.toNumber() : Number(item.unit_price || 0);
-      const lineTotal = unitPrice * displayQty;
+      const multiplier = getMultiplier(item);
+      const originalQty = item.quantity || 1;
+      const displayQty = multiplier * originalQty;
+
+      const unitPrice = getNumericValue(item.unit_price);
+      // 單品總價 = 單價 * 原始數量 (因為單價已經是套裝價)
+      const lineTotal = unitPrice * originalQty;
 
       return `
         <tr>
