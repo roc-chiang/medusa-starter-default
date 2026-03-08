@@ -1,9 +1,27 @@
 export function sodiumTemplate(order: any): string {
   const getDisplayPrice = (amount: any) => {
-    if (amount === undefined || amount === null || amount === 0) {
-      return "0.00";
+    if (amount === undefined || amount === null) return "0.00";
+
+    // Medusa v2 BigNumber 處理：優先檢查 .value (字串) 或 .toNumber()
+    let val: number;
+    if (typeof amount === 'object') {
+      if (amount.value !== undefined) {
+        val = Number(amount.value);
+      } else if (typeof amount.toNumber === 'function') {
+        val = amount.toNumber();
+      } else {
+        val = Number(amount);
+      }
+    } else {
+      val = Number(amount);
     }
-    const val = typeof amount === 'object' && amount.toNumber ? amount.toNumber() : Number(amount);
+
+    // 如果結果仍是 NaN，則返回 0
+    if (isNaN(val)) return "0.00";
+
+    // 注意：Medusa v2 內部以分存儲，但在一些 DTO 中可能已經是元。
+    // 根據用戶之前反饋「476.00 是正確的」，我們暫時不除以 100。
+    // 如果後續發現金額擴大了 100 倍，則在此加上 / 100。
     return val.toFixed(2);
   }
 
@@ -26,13 +44,15 @@ export function sodiumTemplate(order: any): string {
   const itemsHtml = (order.items || [])
     .map((item: any) => {
       const displayQty = getDisplayQuantity(item);
-      const lineTotal = item.unit_price * displayQty;
+      // 行項目單價也可能是 BigNumber
+      const unitPrice = item.unit_price?.toNumber ? item.unit_price.toNumber() : Number(item.unit_price || 0);
+      const lineTotal = unitPrice * displayQty;
 
       return `
         <tr>
           <td style="padding: 12px 0; border-bottom: 1px solid #1e293b; vertical-align: top;">
             <div style="font-size: 16px; font-weight: 600; color: #f8fafc; margin-bottom: 4px;">${item.title}</div>
-            <div style="font-size: 14px; color: #94a3b8;">qty: ${item.quantity > 1 ? item.quantity : displayQty}</div>
+            <div style="font-size: 14px; color: #94a3b8;">qty: ${displayQty}</div>
           </td>
           <td style="padding: 12px 0; border-bottom: 1px solid #1e293b; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #94a3b8; vertical-align: top;">
             CA$${getDisplayPrice(lineTotal)}
@@ -41,11 +61,12 @@ export function sodiumTemplate(order: any): string {
     })
     .join("")
 
-  // 直接從 Medusa v2 訂單根路徑讀取總額，並處理 BigNumber
-  const subtotal = order.subtotal?.toNumber ? order.subtotal.toNumber() : (order.subtotal ?? 0);
-  const shipping = order.shipping_total?.toNumber ? order.shipping_total.toNumber() : (order.shipping_total ?? 0);
-  const tax = order.tax_total?.toNumber ? order.tax_total.toNumber() : (order.tax_total ?? 0);
-  const total = order.total?.toNumber ? order.total.toNumber() : (order.total ?? 0);
+  // Medusa v2 彙總金額應優先從 order.summary 讀取
+  const summary = order.summary || {};
+  const subtotal = summary.subtotal ?? order.subtotal ?? 0;
+  const shipping = summary.shipping_total ?? order.shipping_total ?? 0;
+  const tax = summary.tax_total ?? order.tax_total ?? 0;
+  const total = summary.total ?? order.total ?? 0;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -149,4 +170,3 @@ export function sodiumTemplate(order: any): string {
 </body>
 </html>`
 }
-"
