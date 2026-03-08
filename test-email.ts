@@ -19,6 +19,7 @@ const mockOrder = {
     id: "order_01",
     created_at: new Date().toISOString(),
     email: "gujian8@gmail.com",
+    currency_code: "usd",
     // Medusa v2 根欄位（有時為 0，有時為對象）
     item_subtotal: createBigNumber(386),
     shipping_subtotal: createBigNumber(20),

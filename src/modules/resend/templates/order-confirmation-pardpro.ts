@@ -2,6 +2,8 @@ export function pardproTemplate(order: any): string {
   const getDisplayPrice = (amount: any) => {
     if (amount === undefined || amount === null) return "0.00";
 
+    const currencyPrefix = order.currency_code?.toLowerCase() === 'usd' ? 'US$' : 'CA$';
+
     let val: number;
     if (typeof amount === 'object' && amount.value !== undefined) {
       val = Number(amount.value);
@@ -11,8 +13,8 @@ export function pardproTemplate(order: any): string {
       val = Number(amount);
     }
 
-    if (isNaN(val)) return "0.00";
-    return val.toFixed(2);
+    if (isNaN(val)) return `${currencyPrefix}0.00`;
+    return `${currencyPrefix}${val.toFixed(2)}`;
   }
 
   const getMultiplier = (item: any) => {
@@ -55,7 +57,7 @@ export function pardproTemplate(order: any): string {
             <div style="font-size: 14px; color: #94a3b8;">qty: ${displayQty}</div>
           </td>
           <td style="padding: 12px 0; border-bottom: 1px solid #1e293b; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #94a3b8; vertical-align: top;">
-            CA$${getDisplayPrice(lineTotal)}
+            ${getDisplayPrice(lineTotal)}
           </td>
         </tr>`
     })
@@ -127,19 +129,19 @@ export function pardproTemplate(order: any): string {
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="padding: 8px 0; font-size: 16px; color: #94a3b8;">Subtotal</td>
-                  <td style="padding: 8px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #94a3b8;">CA$${getDisplayPrice(subtotal)}</td>
+                  <td style="padding: 8px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #94a3b8;">${getDisplayPrice(subtotal)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-size: 16px; color: #94a3b8;">Shipping</td>
-                  <td style="padding: 8px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #94a3b8;">CA$${getDisplayPrice(shipping)}</td>
+                  <td style="padding: 8px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #94a3b8;">${getDisplayPrice(shipping)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-size: 16px; color: #94a3b8;">Tax</td>
-                  <td style="padding: 8px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #94a3b8;">CA$${getDisplayPrice(tax)}</td>
+                  <td style="padding: 8px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #94a3b8;">${getDisplayPrice(tax)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 16px 0; font-size: 20px; font-weight: 700; color: #f8fafc; border-top: 1px solid #1e293b;">Total</td>
-                  <td style="padding: 16px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #38bdf8; border-top: 1px solid #1e293b;">CA$${getDisplayPrice(total)}</td>
+                  <td style="padding: 16px 0; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #38bdf8; border-top: 1px solid #1e293b;">${getDisplayPrice(total)}</td>
                 </tr>
               </table>
             </td>
