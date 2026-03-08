@@ -1,26 +1,26 @@
 export function pardproTemplate(order: any): string {
-    const formatDate = (date: Date | string) => {
-        return new Date(date).toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-        })
-    }
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })
+  }
 
-    const itemsHtml = order.items
-        .map(
-            (item: any) => `
+  const itemsHtml = order.items
+    .map(
+      (item: any) => `
         <div class="item">
           <div class="item-info">
             <span class="item-name">${item.title}</span>
             <span class="item-qty">qty: ${item.quantity}</span>
           </div>
-          <span class="item-price">CA$${(item.unit_price).toFixed(2)}</span>
+          <span class="item-price">CA$${(item.unit_price ?? 0).toFixed(2)}</span>
         </div>`
-        )
-        .join("")
+    )
+    .join("")
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -60,10 +60,10 @@ export function pardproTemplate(order: any): string {
       <div class="section-label">Your Selection</div>
       ${itemsHtml}
       <div class="totals">
-        <div class="total-row"><span>Subtotal</span><span>CA$${(order.subtotal).toFixed(2)}</span></div>
-        <div class="total-row"><span>Shipping</span><span>CA$${(order.shipping_total).toFixed(2)}</span></div>
-        <div class="total-row"><span>Tax</span><span>CA$${(order.tax_total).toFixed(2)}</span></div>
-        <div class="total-row grand"><span>Total</span><span>CA$${(order.total).toFixed(2)}</span></div>
+        <div class="total-row"><span>Subtotal</span><span>CA$${(order.subtotal ?? 0).toFixed(2)}</span></div>
+        <div class="total-row"><span>Shipping</span><span>CA$${(order.shipping_total ?? 0).toFixed(2)}</span></div>
+        <div class="total-row"><span>Tax</span><span>CA$${(order.tax_total ?? 0).toFixed(2)}</span></div>
+        <div class="total-row grand"><span>Total</span><span>CA$${(order.total ?? 0).toFixed(2)}</span></div>
       </div>
       <div style="margin-top: 40px;">
         <div class="section-label">Shipping To</div>

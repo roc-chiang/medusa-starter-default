@@ -18,11 +18,13 @@ class ResendNotificationService extends AbstractNotificationProviderService {
     static identifier = "notification-resend"
     protected resend: Resend
     protected options: ResendOptions
+    protected logger: any
 
     constructor({ logger }, options: ResendOptions) {
         super()
         this.resend = new Resend(options.api_key)
         this.options = options
+        this.logger = logger
     }
 
     async send(
@@ -38,6 +40,8 @@ class ResendNotificationService extends AbstractNotificationProviderService {
         if (!order) {
             throw new Error("No order data provided in notification")
         }
+
+        this.logger.info(`Order fields: total=${order.total}, subtotal=${order.subtotal}, shipping=${order.shipping_total}, tax=${order.tax_total}`)
 
         const html = brand === 'sodium'
             ? sodiumTemplate(order)
