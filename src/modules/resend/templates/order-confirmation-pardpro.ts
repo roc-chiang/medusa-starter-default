@@ -2,16 +2,11 @@ export function pardproTemplate(order: any): string {
   const getDisplayPrice = (amount: any) => {
     if (amount === undefined || amount === null) return "0.00";
 
-    // Medusa v2 BigNumber 處理：優先檢查 .value (字串) 或 .toNumber()
     let val: number;
-    if (typeof amount === 'object') {
-      if (amount.value !== undefined) {
-        val = Number(amount.value);
-      } else if (typeof amount.toNumber === 'function') {
-        val = amount.toNumber();
-      } else {
-        val = Number(amount);
-      }
+    if (typeof amount === 'object' && amount.value !== undefined) {
+      val = Number(amount.value);
+    } else if (typeof amount === 'object' && typeof amount.toNumber === 'function') {
+      val = amount.toNumber();
     } else {
       val = Number(amount);
     }
@@ -55,7 +50,7 @@ export function pardproTemplate(order: any): string {
     })
     .join("")
 
-  // Medusa v2 彙總金額應優先從 order.summary 讀取
+  // Medusa v2 彙總金額應優先從 order.summary 讀取 (專家建議最穩定來源)
   const summary = order.summary || {};
   const subtotal = summary.subtotal ?? order.subtotal ?? 0;
   const shipping = summary.shipping_total ?? order.shipping_total ?? 0;
