@@ -20,17 +20,19 @@ const mockOrder = {
     created_at: new Date().toISOString(),
     email: "gujian8@gmail.com",
     // Medusa v2 根欄位（有時為 0，有時為對象）
-    subtotal: createBigNumber(396),
+    item_subtotal: createBigNumber(386),
+    shipping_subtotal: createBigNumber(20),
+    tax_total: createBigNumber(48.72),
+    total: createBigNumber(454.72),
+    subtotal: createBigNumber(406), // item_subtotal + shipping_subtotal
     shipping_total: createBigNumber(20),
-    tax_total: createBigNumber(60),
-    total: createBigNumber(476),
     // Medusa v2 Summary 關聯
     summary: {
-        subtotal: createBigNumber(396),
+        subtotal: createBigNumber(406),
         shipping_total: createBigNumber(20),
-        tax_total: createBigNumber(60),
-        total: createBigNumber(476),
-        current_order_total: createBigNumber(476),
+        tax_total: createBigNumber(48.72),
+        total: createBigNumber(454.72),
+        current_order_total: createBigNumber(454.72),
     },
     items: [
         {

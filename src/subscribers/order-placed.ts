@@ -31,6 +31,8 @@ export default async function orderPlacedHandler({
             "created_at",
             "total",
             "subtotal",
+            "item_subtotal",
+            "shipping_subtotal",
             "tax_total",
             "shipping_total",
             "summary",

@@ -67,11 +67,19 @@ export function sodiumTemplate(order: any): string {
     })
     .join("")
 
-  // Medusa v2 彙總金額：總價建議使用 current_order_total，小計/稅/運費使用根欄位 (需搭配 Subscriber select)
+  // Medusa v2 彙總金額：根據用戶最新需求調整顯示邏輯
   const summary = order.summary || {};
-  const subtotal = order.subtotal ?? summary.subtotal ?? 0;
-  const shipping = order.shipping_total ?? summary.shipping_total ?? 0;
+
+  // 1. 商品小計：優先使用 item_subtotal， fallback 到 subtotal - shipping_total
+  const subtotal = order.item_subtotal ?? (getNumericValue(order.subtotal) - getNumericValue(order.shipping_total));
+
+  // 2. 運費：使用 shipping_subtotal (不含稅運費)
+  const shipping = order.shipping_subtotal ?? order.shipping_total ?? 0;
+
+  // 3. 稅額：使用 tax_total
   const tax = order.tax_total ?? summary.tax_total ?? 0;
+
+  // 4. 總價：優先使用 summary.current_order_total
   const total = summary.current_order_total ?? order.total ?? 0;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
