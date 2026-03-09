@@ -8,6 +8,8 @@ import { Resend } from "resend"
 
 import { pardproTemplate } from "./templates/order-confirmation-pardpro"
 import { sodiumTemplate } from "./templates/order-confirmation-sodium"
+import { shipmentPardproTemplate } from "./templates/shipment-confirmation-pardpro"
+import { shipmentSodiumTemplate } from "./templates/shipment-confirmation-sodium"
 
 type ResendOptions = {
     api_key: string
@@ -34,23 +36,37 @@ class ResendNotificationService extends AbstractNotificationProviderService {
             throw new Error("No recipient specified")
         }
 
-        const order = (notification.data as any).order
-        const brand = (notification.data as any).brand
+        const data = notification.data as any
+        const order = data.order
+        const brand = data.brand
+        const template = notification.template
 
         if (!order) {
             throw new Error("No order data provided in notification")
         }
 
-        this.logger.info(`Order fields: total=${order.total}, subtotal=${order.subtotal}, shipping=${order.shipping_total}, tax=${order.tax_total}`)
+        let html = ""
+        let subject = data.subject
 
-        const html = brand === 'sodium'
-            ? sodiumTemplate(order)
-            : pardproTemplate(order)
+        if (template === "shipment-confirmation") {
+            const trackingNumber = data.trackingNumber || "Pending"
+            const shippingCompany = data.shippingCompany || "Post Canada"
+            html = brand === 'sodium'
+                ? shipmentSodiumTemplate(order, trackingNumber, shippingCompany)
+                : shipmentPardproTemplate(order, trackingNumber, shippingCompany)
+            subject = subject || `Your order #${order.display_id} has shipped!`
+        } else {
+            // Default to order-confirmation
+            html = brand === 'sodium'
+                ? sodiumTemplate(order)
+                : pardproTemplate(order)
+            subject = subject || `Order Confirmed #${order.display_id}`
+        }
 
-        const { data, error } = await this.resend.emails.send({
-            from: (notification.data as any).from || this.options.from,
+        const { data: resendData, error } = await this.resend.emails.send({
+            from: data.from || this.options.from,
             to: notification.to,
-            subject: (notification.data as any).subject || `Order Confirmed #${order.display_id}`,
+            subject,
             html,
         })
 
@@ -58,7 +74,7 @@ class ResendNotificationService extends AbstractNotificationProviderService {
             throw new Error(`Resend error: ${error.message}`)
         }
 
-        return { id: data!.id }
+        return { id: resendData!.id }
     }
 }
 
